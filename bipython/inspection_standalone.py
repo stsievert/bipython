@@ -34,9 +34,9 @@ from pygments.token import Token
 # inlining from bpython._py3compat import PythonLexer, py3
 import sys
 
-py3 = (sys.version_info[0] == 3)
+not_py2 = (sys.version_info[0] >= 3)
 
-if py3:
+if not_py2:
     from pygments.lexers import Python3Lexer as PythonLexer
 else:
     from pygments.lexers import PythonLexer
@@ -54,7 +54,7 @@ try:
 except AttributeError:
     has_instance_type = False
 
-if not py3:
+if not not_py2:
     _name = re.compile(r'[a-zA-Z_]\w*$')
 
 
@@ -80,7 +80,7 @@ class AttrCleaner(object):
         # original methods. :-(
         # The upshot being that introspecting on an object to display its
         # attributes will avoid unwanted side-effects.
-        if py3 or type_ != types.InstanceType:
+        if not_py2 or type_ != types.InstanceType:
             __getattr__ = getattr(type_, '__getattr__', None)
             if __getattr__ is not None:
                 try:
@@ -244,7 +244,7 @@ def getargspec(func, f):
         # '__init__' throws xmlrpclib.Fault (see #202)
         return None
     try:
-        if py3:
+        if not_py2:
             argspec = inspect.getfullargspec(f)
         else:
             argspec = inspect.getargspec(f)
@@ -264,7 +264,7 @@ def getargspec(func, f):
 
 
 def is_eval_safe_name(string):
-    if py3:
+    if not_py2:
         return all(part.isidentifier() and not keyword.iskeyword(part)
                    for part in string.split('.'))
     else:
